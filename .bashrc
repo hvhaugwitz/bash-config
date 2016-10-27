@@ -54,6 +54,19 @@ fi
 # colored GCC warnings and errors
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
 
+# colored man
+man() {
+env \
+LESS_TERMCAP_mb="$(printf '\e[1;32;40m')" \
+LESS_TERMCAP_md="$(printf '\e[1;36;40m')" \
+LESS_TERMCAP_me="$(printf '\e[0m')" \
+LESS_TERMCAP_se="$(printf '\e[0m')" \
+LESS_TERMCAP_so="$(printf '\e[1;44;33m')" \
+LESS_TERMCAP_us="$(printf '\e[1;37;40m')" \
+LESS_TERMCAP_ue="$(printf '\e[0m')" \
+man "$@"
+}
+
 # alias definitions
 if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
