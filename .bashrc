@@ -37,10 +37,29 @@ if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
 else
     color_prompt=
 fi
+
+# last command's run time
+# known limitations:
+#   - '( sleep 5 )' shows 0s
+#   - 'sleep 1 | sleep 2 | sleep 3' shows 3s
+
+function timer_start {
+    timer=${timer:-$SECONDS}
+}
+
+function timer_stop {
+    timer_show=$((SECONDS - timer))
+    unset timer
+}
+
+trap 'timer_start' DEBUG
+
+PROMPT_COMMAND="${PROMPT_COMMAND:-:}; timer_stop"
+
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\u@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[00;33m\]#\#\[\033[00m\] [$?]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\u@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[00;33m\]#\#\[\033[00m\] ${timer_show}s [$?]\$ '
 else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w #\# [$?]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w #\# ${timer_show}s [$?]\$ '
 fi
 unset color_prompt
 
