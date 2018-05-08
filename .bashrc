@@ -28,6 +28,49 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+# colored git status
+function _my_git_ps1 {
+    local exit=$?
+    local staged=false dirty=false conflicts=false untracked=false
+    local behind=0 ahead=0 stash=0
+
+    if git rev-parse --is-inside-work-tree &> /dev/null ; then
+        while IFS='' read -r line ; do
+            if [[ $line =~ ^##\ ([[:alnum:]._-]+)\.\.\. ]] ; then
+                branch="${BASH_REMATCH[1]}"
+                commit="$(git rev-parse --short HEAD)"
+                [[ $line =~ behind\ ([0-9]+) ]] && behind="${BASH_REMATCH[1]}"
+                [[ $line =~ ahead\ ([0-9]+) ]] && ahead="${BASH_REMATCH[1]}"
+            else
+                case "${line:0:2}" in
+                    U?|?U|DD|AA) conflicts=true; break ;;
+                    \?\?) untracked=true; break ;;
+                    M?|A?|D?|R?|C?) staged=true ;;
+                    ?M|?D) dirty=true ;;
+                esac
+            fi
+        done < <(git status --porcelain=v1 --branch 2> /dev/null)
+        stash="$(git stash list | wc -l)"
+
+        printf -- ' (\001\e[0;36m\002%s\001\e[0m\002@\001\e[0;35m\002%s' "${branch}" "${commit}"
+        if ${conflicts} || ${untracked} || ${staged} || ${dirty} ; then
+            printf -- ' '
+            ${conflicts} && printf -- '\001\e[1;31m\002%s' '!'
+            ${untracked} && printf -- '\001\e[1;34m\002%s' '?'
+            ${staged} && printf -- '\001\e[1;32m\002%s' '⚑'
+            ${dirty} && printf -- '\001\e[1;33m\002%s' '∴'
+        fi
+        if [ "${behind}" -gt "0" ] || [ "${ahead}" -gt "0" ] || [ "${stash}" -gt "0" ] ; then
+            printf -- ' '
+            [ "${behind}" -gt "0" ] && printf -- '\001\e[1;32m\002↓%s' "${behind}"
+            [ "${ahead}" -gt "0" ] && printf -- '\001\e[1;31m\002↑%s' "${ahead}"
+            [ "${stash}" -gt "0" ] && printf -- '\001\e[1;36m\002⚒%s' "${stash}"
+        fi
+        printf -- '\001\e[0m\002)'
+    fi
+    return ${exit}
+}
+
 # colored exit code
 function _my_exit_code {
     local exit=$?
@@ -67,7 +110,7 @@ trap 'timer_start' DEBUG
 PROMPT_COMMAND="${PROMPT_COMMAND:-:}; timer_stop"
 
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\u@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[00;33m\]#\#\[\033[00m\] ${timer_show}s [$(_my_exit_code)]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\u@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(_my_git_ps1) \[\033[00;33m\]#\#\[\033[00m\] ${timer_show}s [$(_my_exit_code)]\$ '
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w #\# ${timer_show}s [$?]\$ '
 fi
