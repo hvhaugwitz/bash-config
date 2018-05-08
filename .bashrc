@@ -28,6 +28,16 @@ if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
     debian_chroot=$(cat /etc/debian_chroot)
 fi
 
+# colored exit code
+function _my_exit_code {
+    local exit=$?
+    if [ "${exit}" -gt "0" ] ; then
+        printf -- '\001\e[1;31m\002'
+    fi
+    printf -- '%s\001\e[0m\002' "${exit}"
+    return ${exit}
+}
+
 # set primary prompt
 case "$TERM" in
     xterm-color|*-256color) color_prompt=yes;;
@@ -57,7 +67,7 @@ trap 'timer_start' DEBUG
 PROMPT_COMMAND="${PROMPT_COMMAND:-:}; timer_stop"
 
 if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\u@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[00;33m\]#\#\[\033[00m\] ${timer_show}s [$?]\$ '
+    PS1='${debian_chroot:+($debian_chroot)}\u@\[\033[01;32m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \[\033[00;33m\]#\#\[\033[00m\] ${timer_show}s [$(_my_exit_code)]\$ '
 else
     PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w #\# ${timer_show}s [$?]\$ '
 fi
