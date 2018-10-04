@@ -36,7 +36,7 @@ function _my_git_ps1 {
 
     if git rev-parse --is-inside-work-tree &> /dev/null ; then
         while IFS='' read -r line ; do
-            if [[ $line =~ ^##\ ([[:alnum:]._-]+)\.\.\. ]] ; then
+            if [[ $line =~ ^##\ ([[:alnum:]/._-]+)\.\.\. ]] ; then
                 branch="${BASH_REMATCH[1]}"
                 commit="$(git rev-parse --short HEAD)"
                 [[ $line =~ behind\ ([0-9]+) ]] && behind="${BASH_REMATCH[1]}"
