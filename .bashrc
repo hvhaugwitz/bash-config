@@ -36,11 +36,17 @@ function _my_git_ps1 {
 
     if git rev-parse --is-inside-work-tree &> /dev/null ; then
         while IFS='' read -r line ; do
-            if [[ $line =~ ^##\ ([[:alnum:]/._-]+)\.\.\. ]] ; then
+            if [[ $line =~ ^##\ ([[:alnum:]/._-]+)\.\.\.([[:alnum:]/._-]+) ]] \
+                || [[ $line =~ ^##\ ([[:alnum:]/._-]+[^.]{2})$ ]] \
+                || [[ $line =~ ^##\ (HEAD)\ \(no\ branch\) ]] ; then
                 branch="${BASH_REMATCH[1]}"
+                upstream_branch="${BASH_REMATCH[2]}"
                 commit="$(git rev-parse --short HEAD)"
                 [[ $line =~ behind\ ([0-9]+) ]] && behind="${BASH_REMATCH[1]}"
                 [[ $line =~ ahead\ ([0-9]+) ]] && ahead="${BASH_REMATCH[1]}"
+            elif [[ $line =~ ^##\ No\ commits\ yet\ on\ ([[:alnum:]/._-]+) ]] ; then
+                branch="${BASH_REMATCH[1]}"
+                commit='initial'
             else
                 case "${line:0:2}" in
                     U?|?U|DD|AA) conflicts=true; break ;;
@@ -52,7 +58,16 @@ function _my_git_ps1 {
         done < <(git status --porcelain=v1 --branch 2> /dev/null)
         stash="$(git stash list | wc -l)"
 
-        printf -- ' (\001\e[0;36m\002%s\001\e[0m\002@\001\e[0;35m\002%s' "${branch}" "${commit}"
+        if [ -n "${upstream_branch}" ] ; then
+            if [ "${upstream_branch#origin/}" = "${branch}" ] ; then
+                printf -- ' (\001\e[4;36m\002'
+            else
+                printf -- ' (\001\e[0;36m\002'
+            fi
+        else
+            printf -- ' (\001\e[2;36m\002'
+        fi
+        printf -- '%s\001\e[0m\002@\001\e[0;35m\002%s' "${branch}" "${commit}"
         if ${conflicts} || ${untracked} || ${staged} || ${dirty} ; then
             printf -- ' '
             ${conflicts} && printf -- '\001\e[1;31m\002%s' '!'
