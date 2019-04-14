@@ -44,8 +44,10 @@ function _my_git_ps1 {
                 commit="$(git rev-parse --short HEAD)"
                 [[ $line =~ behind\ ([0-9]+) ]] && behind="${BASH_REMATCH[1]}"
                 [[ $line =~ ahead\ ([0-9]+) ]] && ahead="${BASH_REMATCH[1]}"
-            elif [[ $line =~ ^##\ No\ commits\ yet\ on\ ([[:alnum:]/._-]+) ]] ; then
+            elif [[ $line =~ ^##\ No\ commits\ yet\ on\ ([[:alnum:]/._-]+)\.\.\.([[:alnum:]/._-]+) ]] \
+                || [[ $line =~ ^##\ No\ commits\ yet\ on\ ([[:alnum:]/._-]+) ]] ; then
                 branch="${BASH_REMATCH[1]}"
+                upstream_branch="${BASH_REMATCH[2]}"
                 commit='initial'
             else
                 case "${line:0:2}" in
