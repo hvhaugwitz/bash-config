@@ -34,7 +34,7 @@ function _my_git_ps1 {
     local staged=false dirty=false conflicts=false untracked=false
     local behind=0 ahead=0 stash=0
 
-    if git rev-parse --is-inside-work-tree &> /dev/null ; then
+    if [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" == "true" ] ; then
         while IFS='' read -r line ; do
             if [[ $line =~ ^##\ ([[:alnum:]/._+-]+)\.\.\.([[:alnum:]/._+-]+) ]] \
                 || [[ $line =~ ^##\ ([[:alnum:]/._+-]+[^.]{2})$ ]] \
