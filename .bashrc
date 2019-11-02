@@ -36,8 +36,8 @@ function _my_git_ps1 {
 
     if git rev-parse --is-inside-work-tree &> /dev/null ; then
         while IFS='' read -r line ; do
-            if [[ $line =~ ^##\ ([[:alnum:]/._-]+)\.\.\.([[:alnum:]/._-]+) ]] \
-                || [[ $line =~ ^##\ ([[:alnum:]/._-]+[^.]{2})$ ]] \
+            if [[ $line =~ ^##\ ([[:alnum:]/._+-]+)\.\.\.([[:alnum:]/._+-]+) ]] \
+                || [[ $line =~ ^##\ ([[:alnum:]/._+-]+[^.]{2})$ ]] \
                 || [[ $line =~ ^##\ (HEAD)\ \(no\ branch\) ]] ; then
                 branch="${BASH_REMATCH[1]}"
                 upstream_branch="${BASH_REMATCH[2]}"
