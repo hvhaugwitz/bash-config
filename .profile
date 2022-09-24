@@ -19,7 +19,7 @@ if [ -n "$BASH_VERSION" ]; then
         (
         history -c
         history -r "${TTYHISTFILE}"
-        history | view -i NONE -
+        history | vim -n -i NONE -
         )
     }
     TTYHISTDIR="$HOME/.bash_history.d"
