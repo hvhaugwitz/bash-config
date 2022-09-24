@@ -34,15 +34,15 @@ function _my_git_ps1 {
     local staged=false dirty=false conflicts=false untracked=false
     local behind=0 ahead=0 stash=0
 
-    if [ "$(git rev-parse --is-inside-work-tree 2> /dev/null)" == "true" ] ; then
-        git update-index -q --refresh &> /dev/null
+    if [ "$(git  -c core.fsmonitor= rev-parse --is-inside-work-tree 2> /dev/null)" == "true" ] ; then
+        git  -c core.fsmonitor= update-index -q --refresh &> /dev/null
         while IFS='' read -r line ; do
             if [[ $line =~ ^##\ ([[:alnum:]/._+-]+)\.\.\.([[:alnum:]/._+-]+) ]] \
                 || [[ $line =~ ^##\ ([[:alnum:]/._+-]+[^.]{2})$ ]] \
                 || [[ $line =~ ^##\ (HEAD)\ \(no\ branch\) ]] ; then
                 branch="${BASH_REMATCH[1]}"
                 upstream_branch="${BASH_REMATCH[2]}"
-                commit="$(git rev-parse --short HEAD)"
+                commit="$(git  -c core.fsmonitor= rev-parse --short HEAD)"
                 [[ $line =~ behind\ ([0-9]+) ]] && behind="${BASH_REMATCH[1]}"
                 [[ $line =~ ahead\ ([0-9]+) ]] && ahead="${BASH_REMATCH[1]}"
             elif [[ $line =~ ^##\ No\ commits\ yet\ on\ ([[:alnum:]/._-]+)\.\.\.([[:alnum:]/._-]+) ]] \
@@ -58,8 +58,8 @@ function _my_git_ps1 {
                     ?M|?D) dirty=true ;;
                 esac
             fi
-        done < <(git status --porcelain=v1 --branch 2> /dev/null)
-        stash="$(git stash list | wc -l)"
+        done < <(git -c core.fsmonitor= status --porcelain=v1 --branch 2> /dev/null)
+        stash="$(git -c core.fsmonitor= stash list | wc -l)"
 
         if [ -n "${upstream_branch}" ] ; then
             if [ "${upstream_branch#origin/}" = "${branch}" ] ; then
