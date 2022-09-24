@@ -38,7 +38,7 @@ function _my_git_ps1 {
         git  -c core.fsmonitor= update-index -q --refresh &> /dev/null
         while IFS='' read -r line ; do
             if [[ $line =~ ^##\ ([[:alnum:]/._+-]+)\.\.\.([[:alnum:]/._+-]+) ]] \
-                || [[ $line =~ ^##\ ([[:alnum:]/._+-]+[^.]{2})$ ]] \
+                || [[ $line =~ ^##\ ([[:alnum:]/._+-]+)$ ]] \
                 || [[ $line =~ ^##\ (HEAD)\ \(no\ branch\) ]] ; then
                 branch="${BASH_REMATCH[1]}"
                 upstream_branch="${BASH_REMATCH[2]}"
