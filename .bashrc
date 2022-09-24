@@ -7,7 +7,7 @@ case $- in
 esac
 
 # history
-HISTSIZE=2500
+HISTSIZE=25000
 HISTFILESIZE=-1
 HISTCONTROL=ignoredups
 HISTTIMEFORMAT="%FT%T%z "
